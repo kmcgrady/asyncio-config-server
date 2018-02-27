@@ -1,5 +1,5 @@
 {
-  "tenant": "acme",
+  "tenan": "acme",
   "integration_type": "flight-information-system",
   "configuration": {
     "username": "acme_user",

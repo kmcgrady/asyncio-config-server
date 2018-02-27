@@ -6,7 +6,7 @@ lint:
 	pylint *.py
 
 run:
-	python sanic-server.py
+	python sanic_server.py
 
 watch:
-	find . -name \*.py | entr -r python sanic-server.py
+	find . -name \*.py | entr -r python sanic_server.py

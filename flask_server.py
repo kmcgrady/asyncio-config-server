@@ -1,7 +1,11 @@
 from os import environ
 from dotenv import load_dotenv, find_dotenv
 from flask import Flask, jsonify, abort, request
+from jsonschema import validate, ValidationError
+from pydash import pick
 from pymongo import MongoClient
+
+from config_schema import configuration_get_schema, configuration_post_schema
 
 load_dotenv(find_dotenv())
 app = Flask(__name__)
@@ -12,19 +16,26 @@ collection = client[environ.get('DATABASE')][environ.get('COLLECTION')]
 def add_config():
   body = request.json
 
-  collection.update_one({
-    'tenant': body['tenant'],
-    'integration_type': body['integration_type']
-  }, {'$set': body}, upsert=True)
+  try:
+    validate(body, configuration_post_schema)
+  except ValidationError as ex:
+    return abort(400, ex.message)
+
+  query = pick(body, 'tenant', 'integration_type')
+
+  collection.update_one(query, {'$set': body}, upsert=True)
 
   return jsonify(body)
 
 @app.route('/config', methods=['GET'])
 def get_config():
-  result = collection.find_one({
-    'tenant': request.args.get('tenant'),
-    'integration_type': request.args.get('integration_type')
-  }, {'_id': False})
+  try:
+    validate(request.args, configuration_get_schema)
+  except ValidationError as ex:
+    return abort(400, ex.message)
+
+  query = pick(request.args, 'tenant', 'integration_type')
+  result = collection.find_one(query, {'_id': False})
 
   if not result:
     return abort(404, 'The configuration you requested could not be found.')

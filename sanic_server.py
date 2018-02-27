@@ -1,10 +1,15 @@
 from os import environ
+
 from bson.json_util import dumps
 from dotenv import load_dotenv, find_dotenv
+from jsonschema import validate, ValidationError
 from motor.motor_asyncio import AsyncIOMotorClient
+from pydash import pick
 from sanic import Sanic
-from sanic.exceptions import NotFound
+from sanic.exceptions import NotFound, InvalidUsage
 from sanic.response import text, json
+
+from config_schema import configuration_get_schema, configuration_post_schema
 
 load_dotenv(find_dotenv())
 app = Sanic()
@@ -12,17 +17,22 @@ app = Sanic()
 @app.listener('before_server_start')
 def init(application, loop):
   client = AsyncIOMotorClient(environ.get('DATABASE_URI'), io_loop=loop)
-  application.collection = client[environ.get('DATABASE')][environ.get('COLLECTION')]
+  database_name = environ.get('DATABASE')
+  collection_name = environ.get('COLLECTION')
+  application.collection = client[database_name][collection_name]
 
 @app.route('/config', methods=['POST'])
 async def add_config(request):
   body = request.json
-  application = request.app
+  try:
+    validate(body, configuration_post_schema)
+  except ValidationError as ex:
+    raise InvalidUsage(ex.message)
 
-  await application.collection.update_one({
-    'tenant': body['tenant'],
-    'integration_type': body['integration_type']
-  }, {'$set': body}, upsert=True)
+  application = request.app
+  query = pick(body, 'tenant', 'integration_type')
+
+  await application.collection.update_one(query, {'$set': body}, upsert=True)
 
   return json(body)
 
@@ -30,10 +40,14 @@ async def add_config(request):
 async def get_config(request):
   application = request.app
 
-  result = await application.collection.find_one({
-    'tenant': request.raw_args.get('tenant'),
-    'integration_type': request.raw_args.get('integration_type')
-  }, {'_id': False})
+  try:
+    validate(request.raw_args, configuration_get_schema)
+  except ValidationError as ex:
+    raise InvalidUsage(ex.message)
+
+  query = pick(request.raw_args, 'tenant', 'integration_type')
+
+  result = await application.collection.find_one(query, {'_id': False})
 
   if not result:
     raise NotFound('The configuration you requested could not be found.')
