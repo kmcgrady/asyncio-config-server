@@ -3,7 +3,7 @@
 ## To Setup
 
 * Requires Python 3.5+
-* Install the requirements `pip install -r requirements.txt`
+* Install the requirements `pip install -r requirements.txt` (May need `sudo` permissions)
 
 ## To Run
 
