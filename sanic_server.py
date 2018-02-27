@@ -1,3 +1,5 @@
+import asyncio
+import uvloop
 from os import environ
 
 from bson.json_util import dumps
@@ -12,6 +14,7 @@ from sanic.response import text, json
 
 from config_schema import configuration_get_schema, configuration_post_schema
 
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 load_dotenv(find_dotenv())
 app = Sanic()
 

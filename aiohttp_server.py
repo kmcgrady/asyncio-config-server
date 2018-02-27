@@ -1,3 +1,5 @@
+import asyncio
+import uvloop
 from os import environ
 
 from aiohttp import web
@@ -9,6 +11,7 @@ from pymongo import ReturnDocument
 
 from config_schema import configuration_get_schema, configuration_post_schema
 
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 load_dotenv(find_dotenv())
 
 async def init_db(application):
