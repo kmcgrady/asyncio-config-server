@@ -1,7 +1,7 @@
-from dotenv import load_dotenv, find_dotenv
-from flask import Flask, jsonify, abort, Response, request
-from pymongo import MongoClient
 from os import environ
+from dotenv import load_dotenv, find_dotenv
+from flask import Flask, jsonify, abort, request
+from pymongo import MongoClient
 
 load_dotenv(find_dotenv())
 app = Flask(__name__)

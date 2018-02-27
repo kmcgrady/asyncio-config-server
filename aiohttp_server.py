@@ -1,16 +1,15 @@
+from os import environ
 from aiohttp import web
-from bson.json_util import dumps
 from dotenv import load_dotenv, find_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
-from os import environ
 
 load_dotenv(find_dotenv())
 
-async def init_db(app):
+async def init_db(application):
   client = AsyncIOMotorClient(environ.get('DATABASE_URI'), io_loop=app.loop).us_config_test.configs
-  app['collection'] = client[environ.get('DATABASE')][environ.get('COLLECTION')]
+  application['collection'] = client[environ.get('DATABASE')][environ.get('COLLECTION')]
 
-async def health_check(request):
+async def health_check(_request):
   return web.Response(text='OK')
 
 async def add_config(request):

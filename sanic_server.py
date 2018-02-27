@@ -1,7 +1,7 @@
+from os import environ
 from bson.json_util import dumps
 from dotenv import load_dotenv, find_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
-from os import environ
 from sanic import Sanic
 from sanic.exceptions import NotFound
 from sanic.response import text, json
@@ -10,16 +10,16 @@ load_dotenv(find_dotenv())
 app = Sanic()
 
 @app.listener('before_server_start')
-def init(app, loop):
-  client = AsyncIOMotorClient(environ.get('DATABASE_URI'), io_loop=app.loop).us_config_test.configs
-  app.collection = client[environ.get('DATABASE')][environ.get('COLLECTION')]
+def init(application, loop):
+  client = AsyncIOMotorClient(environ.get('DATABASE_URI'), io_loop=loop)
+  application.collection = client[environ.get('DATABASE')][environ.get('COLLECTION')]
 
 @app.route('/config', methods=['POST'])
 async def add_config(request):
   body = request.json
-  app = request.app
+  application = request.app
 
-  await app.collection.update_one({
+  await application.collection.update_one({
     'tenant': body['tenant'],
     'integration_type': body['integration_type']
   }, {'$set': body}, upsert=True)
@@ -28,9 +28,9 @@ async def add_config(request):
 
 @app.route('/config', methods=['GET'])
 async def get_config(request):
-  app = request.app
+  application = request.app
 
-  result = await app.collection.find_one({
+  result = await application.collection.find_one({
     'tenant': request.raw_args.get('tenant'),
     'integration_type': request.raw_args.get('integration_type')
   }, {'_id': False})
