@@ -5,6 +5,7 @@ from dotenv import load_dotenv, find_dotenv
 from jsonschema import validate, ValidationError
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydash import pick
+from pymongo import ReturnDocument
 from sanic import Sanic
 from sanic.exceptions import NotFound, InvalidUsage
 from sanic.response import text, json
@@ -32,9 +33,19 @@ async def add_config(request):
   application = request.app
   query = pick(body, 'tenant', 'integration_type')
 
-  await application.collection.update_one(query, {'$set': body}, upsert=True)
+  # Merge values in here
+  for key in body['configuration'].keys():
+    body['configuration.{}'.format(key)] = body['configuration'][key]
 
-  return json(body)
+  del body['configuration']
+
+  coll = application.collection
+  result = await coll.find_one_and_update(query, {'$set': body},
+                                          upsert=True,
+                                          return_document=ReturnDocument.AFTER)
+  del result['_id']
+
+  return json(result)
 
 @app.route('/config', methods=['GET'])
 async def get_config(request):

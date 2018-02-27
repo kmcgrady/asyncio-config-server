@@ -1,4 +1,5 @@
 from locust import HttpLocust, TaskSet, task
+from config_schema import sample_config
 
 class UserBehavior(TaskSet):
   def on_start(self):
@@ -9,18 +10,7 @@ class UserBehavior(TaskSet):
     self.client.get("/")
 
   def post(self):
-    self.client.post("/config", json={
-      "tenant": "acme",
-      "integration_type": "flight-information-system",
-      "configuration": {
-        "username": "acme_user",
-        "password": "acme54321",
-        "wsdl_urls": {
-          "session_url": "https://session.manager.svc",
-          "booking_url": "https://booking.manager.svc"
-        }
-      }
-    }, headers={
+    self.client.post("/config", json=sample_config, headers={
       'Content-Type': 'application/json'
     })
 

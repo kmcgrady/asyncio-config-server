@@ -16,3 +16,16 @@ configuration_get_schema = {
   },
   'required': ['tenant', 'integration_type']
 }
+
+sample_config = {
+  "tenant": "acme",
+  "integration_type": "flight-information-system",
+  "configuration": {
+    "username": "acme_user",
+    "password": "acme54321",
+    "wsdl_urls": {
+      "session_url": "https://session.manager.svc",
+      "booking_url": "https://booking.manager.svc"
+    }
+  }
+}

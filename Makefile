@@ -10,3 +10,9 @@ run:
 
 watch:
 	find . -name \*.py | entr -r python sanic_server.py
+
+test:
+	pytest
+
+test-with-coverage:
+	py.test --cov=coverage .
