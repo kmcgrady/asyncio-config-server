@@ -34,7 +34,7 @@ def add_config():
                                           return_document=ReturnDocument.AFTER)
   del result['_id']
 
-  return jsonify(body)
+  return jsonify(result)
 
 @app.route('/config', methods=['GET'])
 def get_config():

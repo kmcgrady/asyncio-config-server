@@ -46,7 +46,7 @@ async def add_config(request):
 
 async def get_config(request):
   try:
-    validate(request.query, configuration_get_schema)
+    validate(dict(request.query), configuration_get_schema)
   except ValidationError as ex:
     return web.Response(status=400, text=ex.message)
 
