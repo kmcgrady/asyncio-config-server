@@ -1,9 +1,12 @@
+from dotenv import load_dotenv, find_dotenv
 from flask import Flask, jsonify, abort, Response, request
 from pymongo import MongoClient
+from os import environ
 
+load_dotenv(find_dotenv())
 app = Flask(__name__)
-mongo_uri = 'mongodb://test:test@ds147668.mlab.com:47668/us_config_test'
-collection = MongoClient(mongo_uri).us_config_test.configs
+client = MongoClient(environ.get('DATABASE_URI'))
+collection = client[environ.get('DATABASE')][environ.get('COLLECTION')]
 
 @app.route('/config', methods=['POST'])
 def add_config():

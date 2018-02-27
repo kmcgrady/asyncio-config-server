@@ -1,11 +1,14 @@
 from aiohttp import web
 from bson.json_util import dumps
+from dotenv import load_dotenv, find_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
+from os import environ
+
+load_dotenv(find_dotenv())
 
 async def init_db(app):
-  mongo_uri = 'mongodb://test:test@ds147668.mlab.com:47668/us_config_test'
-  collection = AsyncIOMotorClient(mongo_uri, io_loop=app.loop).us_config_test.configs
-  app['collection'] = collection
+  client = AsyncIOMotorClient(environ.get('DATABASE_URI'), io_loop=app.loop).us_config_test.configs
+  app['collection'] = client[environ.get('DATABASE')][environ.get('COLLECTION')]
 
 async def health_check(request):
   return web.Response(text='OK')

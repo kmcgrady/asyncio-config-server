@@ -1,15 +1,18 @@
 from bson.json_util import dumps
+from dotenv import load_dotenv, find_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
+from os import environ
 from sanic import Sanic
 from sanic.exceptions import NotFound
 from sanic.response import text, json
 
+load_dotenv(find_dotenv())
 app = Sanic()
 
 @app.listener('before_server_start')
 def init(app, loop):
-  mongo_uri = 'mongodb://test:test@ds147668.mlab.com:47668/us_config_test'
-  app.collection = AsyncIOMotorClient(mongo_uri, io_loop=loop).us_config_test.configs
+  client = AsyncIOMotorClient(environ.get('DATABASE_URI'), io_loop=app.loop).us_config_test.configs
+  app.collection = client[environ.get('DATABASE')][environ.get('COLLECTION')]
 
 @app.route('/config', methods=['POST'])
 async def add_config(request):
