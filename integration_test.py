@@ -18,8 +18,6 @@ from sanic_server import app  # pylint: disable=wrong-import-position
 client = MongoClient(environ.get('TEST_DATABASE_URI'))
 collection = client[environ.get('TEST_DATABASE')][environ.get('COLLECTION')]
 
-
-
 @pytest.yield_fixture(autouse=True)
 def run_around_tests():
   query = pick(sample_config, 'tenant', 'integration_type')

@@ -5,6 +5,7 @@ from dotenv import load_dotenv, find_dotenv
 from jsonschema import validate, ValidationError
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydash import pick
+from pymongo import ReturnDocument
 
 from config_schema import configuration_get_schema, configuration_post_schema
 
@@ -28,11 +29,20 @@ async def add_config(request):
   except ValidationError as ex:
     return web.Response(status=400, text=ex.message)
 
-  query = pick(body, 'tenant', 'integration_type')
-  collection = request.app['collection']
-  await collection.update_one(query, {'$set': body}, upsert=True)
+  # Merge values in here
+  for key in body['configuration'].keys():
+    body['configuration.{}'.format(key)] = body['configuration'][key]
 
-  return web.json_response(body)
+  del body['configuration']
+
+  query = pick(body, 'tenant', 'integration_type')
+  coll = request.app['collection']
+  result = await coll.find_one_and_update(query, {'$set': body},
+                                          upsert=True,
+                                          return_document=ReturnDocument.AFTER)
+  del result['_id']
+
+  return web.json_response(result)
 
 async def get_config(request):
   try:

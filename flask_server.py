@@ -3,7 +3,7 @@ from dotenv import load_dotenv, find_dotenv
 from flask import Flask, jsonify, abort, request
 from jsonschema import validate, ValidationError
 from pydash import pick
-from pymongo import MongoClient
+from pymongo import MongoClient, ReturnDocument
 
 from config_schema import configuration_get_schema, configuration_post_schema
 
@@ -23,7 +23,16 @@ def add_config():
 
   query = pick(body, 'tenant', 'integration_type')
 
-  collection.update_one(query, {'$set': body}, upsert=True)
+  # Merge values in here
+  for key in body['configuration'].keys():
+    body['configuration.{}'.format(key)] = body['configuration'][key]
+
+  del body['configuration']
+
+  result = collection.find_one_and_update(query, {'$set': body},
+                                          upsert=True,
+                                          return_document=ReturnDocument.AFTER)
+  del result['_id']
 
   return jsonify(body)
 

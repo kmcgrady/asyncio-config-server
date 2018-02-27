@@ -15,4 +15,4 @@ test:
 	pytest
 
 test-with-coverage:
-	py.test --cov=coverage .
+	pytest --cov=. --cov-report html
