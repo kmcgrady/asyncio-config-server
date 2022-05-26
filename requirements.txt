@@ -35,7 +35,7 @@ pyzmq==17.0.0
 requests==2.18.4
 sanic==0.7.0
 six==1.11.0
-ujson==1.35
+ujson==5.2.0
 urllib3==1.22
 uvloop==0.8.1
 websockets==4.0.1
