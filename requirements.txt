@@ -33,7 +33,7 @@ pytest-cov==2.5.1
 python-dotenv==0.6.1
 pyzmq==17.0.0
 requests==2.18.4
-sanic==0.7.0
+sanic==20.12.7
 six==1.11.0
 ujson==1.35
 urllib3==1.22
